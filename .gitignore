@@ -1,0 +1,50 @@
+# Build output
+build/
+esp32-sub/build/
+esp32-sub/bootloader/
+esp32-sub/bootloader-prefix/
+esp32-sub/CMakeFiles/
+esp32-sub/*.ninja
+esp32-sub/CMakeCache.txt
+esp32-sub/cmake_install.cmake
+esp32-sub/project_description.json
+
+# ESP-IDF generated files
+esp32/sdkconfig.old
+esp32/sdkconfig.log
+esp32/*.cache
+esp32/*.log
+esp32/flasher_args.json
+esp32/flash_args
+esp32/flash_app_args
+esp32/flash_bootloader_args
+esp32/partition_table/
+esp32/config/project_description.json
+
+# Python
+.venv/
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.env
+venv/
+pip-wheel-metadata/
+*.egg-info/
+raspberry/config.json
+
+# IDE/editor
+.vscode/
+*.code-workspace
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+.DS_Store
+
+*.csv

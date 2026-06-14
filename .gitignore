@@ -31,7 +31,6 @@ __pycache__/
 venv/
 pip-wheel-metadata/
 *.egg-info/
-raspberry/config.json
 
 # IDE/editor
 .vscode/

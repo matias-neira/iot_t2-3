@@ -26,9 +26,10 @@ class MainWindow(QMainWindow):
 
         self.__tab_widget = QTabWidget()
         self.__main_tab = QWidget()
+        self.__accel_tab = QWidget()
+        self.__temp_tab = QWidget()
+        self.__status_tab = QWidget()
         self.__config_tab = QWidget()
-
-        main_layout = QVBoxLayout(self.__main_tab)
 
         self.__accel_data = []
         self.__accel_plot = pg.PlotWidget(title="Gráfico de Aceleración")
@@ -43,28 +44,15 @@ class MainWindow(QMainWindow):
         self.signals.temp_data_signal.connect(self.__update_temp_data)
         self.signals.server_data_signal.connect(self.__update_server_data)
 
-        self.__accel_button = QPushButton("Gráfico de aceleración", self)
-        self.__temp_button = QPushButton("Temperatura actual", self)
-        self.__server_button = QPushButton("Información del servidor", self)
         self.__record_button = QPushButton("Iniciar Grabación", self)
         self.__range_button = QPushButton("Ajustar ventana", self)
 
-        self.__accel_button.clicked.connect(self.__on_accel_button_pressed)
-        self.__temp_button.clicked.connect(self.__on_temp_button_pressed)
-        self.__server_button.clicked.connect(self.__on_server_button_pressed)
         self.__record_button.clicked.connect(self.__on_record_button_pressed)
         self.__range_button.clicked.connect(self.__on_range_button_pressed)
 
         self.__button_container = QWidget()
         button_layout = QHBoxLayout(self.__button_container)
-        button_layout.addWidget(self.__accel_button)
-        button_layout.addWidget(self.__temp_button)
-        button_layout.addWidget(self.__server_button)
         button_layout.addWidget(self.__record_button)
-        
-        self.__accel_info = QGroupBox("Aceleración")
-        self.__temp_info = QGroupBox("Temperatura")
-        self.__server_info = QGroupBox("Servidor")
 
         self.__temp_label = QLabel("Temperatura: N/A", self)
         self.__server_label = QLabel("Información del servidor: N/A", self)
@@ -73,26 +61,17 @@ class MainWindow(QMainWindow):
         self.__peak_label = QLabel("Peak+ X: N/A | Peak+ Y: N/A | Peak+ Z: N/A", self)
         self.__p2p_label = QLabel("Pk-Pk X: N/A | Pk-Pk Y: N/A | Pk-Pk Z: N/A", self)
 
-        self.__accel_info.setVisible(False)
-        self.__temp_info.setVisible(False)
-        self.__server_info.setVisible(False)
-
-        main_layout.addWidget(self.__button_container, alignment=Qt.AlignTop)
-        main_layout.addWidget(self.__accel_info)
-        main_layout.addWidget(self.__temp_info)
-        main_layout.addWidget(self.__server_info)
-
-        accel_layout = QVBoxLayout(self.__accel_info)
+        accel_layout = QVBoxLayout(self.__accel_tab)
         accel_layout.addWidget(self.__accel_plot)
         accel_layout.addWidget(self.__rms_label)
         accel_layout.addWidget(self.__peak_label)
         accel_layout.addWidget(self.__p2p_label)
         accel_layout.addWidget(self.__range_button)
 
-        temp_layout = QVBoxLayout(self.__temp_info)
+        temp_layout = QVBoxLayout(self.__temp_tab)
         temp_layout.addWidget(self.__temp_label)
 
-        server_layout = QVBoxLayout(self.__server_info)
+        server_layout = QVBoxLayout(self.__status_tab)
         server_layout.addWidget(self.__server_label)
 
         self.__accel_enabled_checkbox = QCheckBox("Acelerómetro habilitado", self)
@@ -131,6 +110,9 @@ class MainWindow(QMainWindow):
         config_layout.addWidget(self.__reload_config_button, alignment=Qt.AlignRight)
 
         self.__tab_widget.addTab(self.__main_tab, "Principal")
+        self.__tab_widget.addTab(self.__accel_tab, "Aceleración")
+        self.__tab_widget.addTab(self.__temp_tab, "Temperatura")
+        self.__tab_widget.addTab(self.__status_tab, "Estado")
         self.__tab_widget.addTab(self.__config_tab, "Configuración")
 
         container = QWidget()
@@ -140,15 +122,6 @@ class MainWindow(QMainWindow):
 
         self.__alive = True
         self.destroyed.connect(self._on_destroyed)
-    
-    def __on_accel_button_pressed(self) -> None:
-        self.__accel_info.setVisible(not self.__accel_info.isVisible())
-
-    def __on_temp_button_pressed(self) -> None:
-        self.__temp_info.setVisible(not self.__temp_info.isVisible())
-
-    def __on_server_button_pressed(self) -> None:
-        self.__server_info.setVisible(not self.__server_info.isVisible())
 
     def __on_range_button_pressed(self) -> None:
         value, ok = QInputDialog.getInt(

@@ -21,17 +21,22 @@ class MainWindow(QMainWindow):
         self.__recording = False
         self.__saved_data = []
 
+        self.signals.accel_data_signal.connect(self.__update_accel_data)
+        self.signals.temp_data_signal.connect(self.__update_temp_data)
+        self.signals.status_data_signal.connect(self.__update_state_data)
+
         self.setWindowTitle("Raspberry BLE Client")
         self.setGeometry(100, 100, 800, 600)
 
         self.__tab_widget = QTabWidget()
-        self.__main_tab = QWidget()
         self.__accel_tab = QWidget()
         self.__temp_tab = QWidget()
         self.__status_tab = QWidget()
         self.__config_tab = QWidget()
 
+        self.__min_time = 2000
         self.__accel_data = []
+        self.__accel_message_count = 0
         self.__accel_plot = pg.PlotWidget(title="Gráfico de Aceleración")
         self.__accel_plot.setFixedSize(760, 300)
         self.__accel_plot.addLegend()
@@ -39,10 +44,14 @@ class MainWindow(QMainWindow):
         self.__accel_plot.setLabel('bottom', 'Muestras')
         self.__accel_plot.setYRange(-20, 20)
 
-        self.min_time = 2000
-        self.signals.accel_data_signal.connect(self.__update_accel_data)
-        self.signals.temp_data_signal.connect(self.__update_temp_data)
-        self.signals.server_data_signal.connect(self.__update_server_data)
+        self.__temp_data = []
+        self.__temp_message_count = 0
+        self.__temp_plot = pg.PlotWidget(title="Gráfico de Temperatura")
+        self.__temp_plot.setFixedSize(760, 300)
+        self.__temp_plot.setLabel('left', 'Temperatura (°C)')
+        self.__temp_plot.setLabel('bottom', 'Muestras')
+        self.__temp_plot.setXRange(0, 30, padding=0)
+        self.__temp_plot.setYRange(0, 40)
 
         self.__record_button = QPushButton("Iniciar Grabación", self)
         self.__range_button = QPushButton("Ajustar ventana", self)
@@ -50,12 +59,8 @@ class MainWindow(QMainWindow):
         self.__record_button.clicked.connect(self.__on_record_button_pressed)
         self.__range_button.clicked.connect(self.__on_range_button_pressed)
 
-        self.__button_container = QWidget()
-        button_layout = QHBoxLayout(self.__button_container)
-        button_layout.addWidget(self.__record_button)
-
         self.__temp_label = QLabel("Temperatura: N/A", self)
-        self.__server_label = QLabel("Información del servidor: N/A", self)
+        self.__status_label = QLabel("Estado: N/A", self)
 
         self.__rms_label = QLabel("RMSx: N/A | RMSy: N/A | RMSz: N/A", self)
         self.__peak_label = QLabel("Peak+ X: N/A | Peak+ Y: N/A | Peak+ Z: N/A", self)
@@ -70,9 +75,9 @@ class MainWindow(QMainWindow):
 
         temp_layout = QVBoxLayout(self.__temp_tab)
         temp_layout.addWidget(self.__temp_label)
-
-        server_layout = QVBoxLayout(self.__status_tab)
-        server_layout.addWidget(self.__server_label)
+        temp_layout.addWidget(self.__temp_plot)
+        status_layout = QVBoxLayout(self.__status_tab)
+        status_layout.addWidget(self.__status_label)
 
         self.__accel_enabled_checkbox = QCheckBox("Acelerómetro habilitado", self)
         self.__accel_qos_combo = QComboBox(self)
@@ -109,14 +114,19 @@ class MainWindow(QMainWindow):
         config_layout.addWidget(self.__apply_config_button, alignment=Qt.AlignRight)
         config_layout.addWidget(self.__reload_config_button, alignment=Qt.AlignRight)
 
-        self.__tab_widget.addTab(self.__main_tab, "Principal")
         self.__tab_widget.addTab(self.__accel_tab, "Aceleración")
         self.__tab_widget.addTab(self.__temp_tab, "Temperatura")
         self.__tab_widget.addTab(self.__status_tab, "Estado")
         self.__tab_widget.addTab(self.__config_tab, "Configuración")
 
+        top_bar = QWidget()
+        top_bar_layout = QHBoxLayout(top_bar)
+        top_bar_layout.addWidget(self.__record_button)
+        top_bar_layout.addStretch()
+
         container = QWidget()
         container_layout = QVBoxLayout(container)
+        container_layout.addWidget(top_bar)
         container_layout.addWidget(self.__tab_widget)
         self.setCentralWidget(container)
 
@@ -128,13 +138,13 @@ class MainWindow(QMainWindow):
             self,
             "Ajustar ventana de aceleración",
             "Min time (ms):",
-            self.min_time,
+            self.__min_time,
             2000,
             15000,
             1,
         )
         if ok:
-            self.min_time = value
+            self.__min_time = value
             if self.__accel_data:
                 self.__plot_accel_data(self.__accel_data[-1][3])
 
@@ -146,31 +156,31 @@ class MainWindow(QMainWindow):
 
     def __update_accel_data(self, timestamp: int, x: float, y: float, z: float) -> None:
 
+        self.__accel_message_count += 1
+
         if self.__recording:
-            self.__saved_data.append((x, y, z, timestamp))
+            self.__saved_data.append(((x, y, z, timestamp), 0))
 
-        if len(self.__accel_data) < 20000:
-            self.__accel_data.append((x, y, z, timestamp))
-
-        else:
+        if len(self.__accel_data) >= 20000:
             self.__accel_data.pop(0)
-            self.__accel_data.append((x, y, z, timestamp))
+        self.__accel_data.append((x, y, z, timestamp))
 
         self.__plot_accel_data(timestamp)
 
     def __plot_accel_data(self, timestamp: int) -> None:
-        recent_samples = [sample for sample in self.__accel_data if sample[3] - timestamp + self.min_time >= 0]
+        const = self.__min_time - timestamp
+        recent_samples = [sample for sample in self.__accel_data if sample[3] + const >= 0]
 
         if not recent_samples:
             return
 
-        t_data = [sample[3] - timestamp + self.min_time for sample in recent_samples]
+        t_data = [sample[3] + const for sample in recent_samples]
         x_data = [sample[0] for sample in recent_samples]
         y_data = [sample[1] for sample in recent_samples]
         z_data = [sample[2] for sample in recent_samples]
 
         self.__accel_plot.clear()
-        self.__accel_plot.setXRange(0, self.min_time, padding=0)
+        self.__accel_plot.setXRange(0, self.__min_time, padding=0)
         self.__accel_plot.plot(t_data, x_data, pen='r', name='X')
         self.__accel_plot.plot(t_data, y_data, pen='g', name='Y')
         self.__accel_plot.plot(t_data, z_data, pen='b', name='Z')
@@ -201,19 +211,29 @@ class MainWindow(QMainWindow):
 
     def __update_temp_data(self, timestamp: int, temp: float) -> None:
 
+        self.__temp_message_count += 1
+
         if self.__recording:
-            self.__saved_data.append((temp, timestamp))
+            self.__saved_data.append(((temp, timestamp), 1))
+
+        if len(self.__temp_data) >= 2000:
+            self.__temp_data.pop(0)
+        self.__temp_data.append(temp)
 
         self.__temp_label.setText(f"Temperatura: {temp} °C. Última actualización: {timestamp}")
 
-    def __update_server_data(self, info: str) -> None:
+        plot_data = self.__temp_data[-30:]
+        self.__temp_plot.clear()
+        self.__temp_plot.plot(list(range(len(self.__temp_data))), self.__temp_data, pen='r')
+        
+    def __update_state_data(self, info: str) -> None:
 
         timestamp = datetime.now().timestamp()
         if self.__recording:
-            self.__saved_data.append((info, timestamp))
+            self.__saved_data.append(((info, timestamp), 2))
 
-        self.__server_label.setText(f"Información del servidor: {info}. Última actualización: {timestamp}")
-    
+        self.__status_label.setText(f"Estado: {info}. Última actualización: {timestamp}")
+
     def __on_record_button_pressed(self) -> None:
 
         if not self.__recording:
@@ -228,22 +248,31 @@ class MainWindow(QMainWindow):
             writer = csv.writer(file)
             writer.writerow(['Timestamp', 'Source', 'topic', 'qos', 'ax', 'ay', 'az', 'Temperatura'])
 
-            for i in self.__saved_data:
-                if len(i) == 4:
-                    writer.writerow([i[3], 'ESP32', i[0], i[1], i[2], '', ''])
+            accel_config = self.__config.get_sensors_accel_config()
+            temp_config = self.__config.get_sensors_temp_config()
 
-                elif isinstance(i[0], float):
-                    writer.writerow([i[1], 'ESP32', '', '', '', i[0], ''])
+            accel_qos = accel_config.get("qos", 0)
+            temp_qos = temp_config.get("qos", 0)
 
-                else:
-                    writer.writerow([i[1], 'Celular', '', '', '', '', i[0]])
+            for data, data_type in self.__saved_data:
+                if data_type == 0:
+                    writer.writerow([data[3], 'ESP32', '', accel_qos, data[0], data[1], data[2], ''])
+
+                elif data_type == 1:
+                    writer.writerow([data[1], 'ESP32', '', temp_qos, '', '', '', data[0]])
+
+                elif data_type == 2:
+                    writer.writerow([data[1], 'Raspberry', data[2], 1, '', '', '', '', ''])
 
         self.__saved_data = []
 
     def __on_apply_config_button_pressed(self) -> None:
-        sensors_config = self.__config.get_sensors_config()
-        accel_rate_hz = sensors_config.get("accel", {}).get("rate_hz", 50)
-        temp_rate_hz = sensors_config.get("temp", {}).get("rate_hz", 0.067)
+
+        accel_config = self.__config.get_sensors_accel_config()
+        temp_config = self.__config.get_sensors_temp_config()
+
+        accel_rate_hz = accel_config.get("rate_hz", 50)
+        temp_rate_hz = temp_config.get("rate_hz", 0.067)
 
         new_config = {
             "accel": {
@@ -261,17 +290,15 @@ class MainWindow(QMainWindow):
         self.__config.save_config(new_config)
 
     def __on_reload_config_button_pressed(self) -> None:
-        self.__config.reset_to_default()
         self.__set_config_values()
 
     def __set_config_values(self) -> None:
-        accel_config = self.__config.get_sensors_config().get("accel")
-        temp_config = self.__config.get_sensors_config().get("temp")
+        accel_config = self.__config.get_sensors_accel_config()
+        temp_config = self.__config.get_sensors_temp_config()
 
         self.__accel_enabled_checkbox.setChecked(accel_config.get("enabled"))
         self.__accel_qos_combo.setCurrentText(str(accel_config.get("qos")))
 
         self.__temp_enabled_checkbox.setChecked(temp_config.get("enabled"))
         self.__temp_qos_combo.setCurrentText(str(temp_config.get("qos")))
-
         

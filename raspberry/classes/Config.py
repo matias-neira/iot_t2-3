@@ -38,7 +38,11 @@ class Config:
 
     def get_mqtt_broker_uri(self) -> str: return self.__config.get("mqtt_broker_uri", "mqtt://192.168.10.1:1883")
 
-    def get_sensors_config(self) -> dict[str, dict[str]]: return self.__config.get("sensors", self.__DEFAULT_CONFIG.get("sensors"))
+    def __get_sensors_config(self) -> dict[str, dict[str]]: return self.__config.get("sensors", self.__DEFAULT_CONFIG.get("sensors"))
+
+    def get_sensors_accel_config(self) -> dict[str]: return self.__get_sensors_config().get("accel", self.__DEFAULT_CONFIG["sensors"]["accel"])
+
+    def get_sensors_temp_config(self) -> dict[str]: return self.__get_sensors_config().get("temp", self.__DEFAULT_CONFIG["sensors"]["temp"])
 
     def save_config(self, sensors_config: dict) -> None:
         self.__config["sensors"] = sensors_config

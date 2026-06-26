@@ -224,7 +224,7 @@ class MainWindow(QMainWindow):
 
         plot_data = self.__temp_data[-30:]
         self.__temp_plot.clear()
-        self.__temp_plot.plot(list(range(len(self.__temp_data))), self.__temp_data, pen='r')
+        self.__temp_plot.plot(list(range(len(plot_data))), plot_data, pen='r')
         
     def __update_state_data(self, info: str) -> None:
 
@@ -246,7 +246,7 @@ class MainWindow(QMainWindow):
 
         with open('data.csv', mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['Timestamp', 'Source', 'topic', 'qos', 'ax', 'ay', 'az', 'Temperatura'])
+            writer.writerow(['timestamp_ms', 'source', 'topic', 'qos', 'ax', 'ay', 'az', 'temperature'])
 
             accel_config = self.__config.get_sensors_accel_config()
             temp_config = self.__config.get_sensors_temp_config()

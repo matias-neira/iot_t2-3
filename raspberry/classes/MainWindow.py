@@ -17,13 +17,13 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.__config = Config()
-        self.signals = Signal()
+        self.__signals = Signal()
         self.__recording = False
         self.__saved_data = []
 
-        self.signals.accel_data_signal.connect(self.__update_accel_data)
-        self.signals.temp_data_signal.connect(self.__update_temp_data)
-        self.signals.status_data_signal.connect(self.__update_state_data)
+        self.__signals.accel_data_signal.connect(self.__update_accel_data)
+        self.__signals.temp_data_signal.connect(self.__update_temp_data)
+        self.__signals.status_data_signal.connect(self.__update_state_data)
 
         self.setWindowTitle("Raspberry BLE Client")
         self.setGeometry(100, 100, 800, 600)
@@ -301,4 +301,13 @@ class MainWindow(QMainWindow):
 
         self.__temp_enabled_checkbox.setChecked(temp_config.get("enabled"))
         self.__temp_qos_combo.setCurrentText(str(temp_config.get("qos")))
+
+    def get_accel_signal(self) -> Signal:
+        return self.__signals.accel_data_signal
+    
+    def get_temp_signal(self) -> Signal:
+        return self.__signals.temp_data_signal
+    
+    def get_status_signal(self) -> Signal:
+        return self.__signals.status_data_signal
         

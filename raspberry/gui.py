@@ -4,14 +4,11 @@ from qasync import QEventLoop
 
 from classes.MainWindow import MainWindow
 from utils.subscriptions import subscribe
-from utils.wifi_server import wifi_server
 
-def main() -> None:
-
-    #load_config()
+async def gui(event: asyncio.Event) -> None:
     
     app = QApplication([])
-    window = MainWindow()
+    window = MainWindow(event)
     window.show()
 
     loop = QEventLoop(app)
@@ -19,12 +16,7 @@ def main() -> None:
 
     asyncio.gather(
         subscribe(window),
-        #esp32_conn(window),
-        #server_conn(window),
     )
     
     with loop:
         loop.run_forever()
-
-if __name__ == "__main__":
-    main()

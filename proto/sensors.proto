@@ -1,5 +1,5 @@
-syntax = " proto3 " ;
-package iot ;
+syntax = "proto3";
+package iot;
 
 message AccelSample {
     uint32 timestamp_ms = 1;

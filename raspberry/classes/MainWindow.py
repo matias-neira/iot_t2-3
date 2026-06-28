@@ -1,3 +1,4 @@
+import asyncio
 from math import sqrt
 import csv
 from datetime import datetime
@@ -13,8 +14,10 @@ from .Signal import Signal
 from .Config import Config
 
 class MainWindow(QMainWindow):
-    def __init__(self) -> None:
+    def __init__(self, event: asyncio.Event) -> None:
         super().__init__()
+
+        self.__event = event
 
         self.__config = Config()
         self.__signals = Signal()
@@ -301,6 +304,8 @@ class MainWindow(QMainWindow):
 
         self.__temp_enabled_checkbox.setChecked(temp_config.get("enabled"))
         self.__temp_qos_combo.setCurrentText(str(temp_config.get("qos")))
+
+        self.__event.set()
 
     def get_accel_signal(self) -> Signal:
         return self.__signals.accel_data_signal

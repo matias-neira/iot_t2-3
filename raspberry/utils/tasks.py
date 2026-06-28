@@ -8,26 +8,26 @@ _accel_messages_amount = 0
 _temp_messages_amount = 0
 _status_messages_amount = 0
 
-async def accel_task(client: Client) -> None:
+async def accel_task(client: Client, enabled: bool, qos: int) -> None:
     global _accel_messages_amount
 
-    while True:
+    while enabled:
         accel = simulate_accel()
         msg_bytes = json.dumps(accel)
 
-        client.publish("iot/rpi4/accel", msg_bytes)
+        client.publish("iot/rpi4/accel", msg_bytes, qos=qos)
 
         _accel_messages_amount += 1
         time.sleep(.02)
 
-async def temp_task(client: Client) -> None:
+async def temp_task(client: Client, enabled: bool, qos: int) -> None:
     global _temp_messages_amount
 
-    while True:
+    while enabled:
         temp = simulate_temp()
         msg_bytes = json.dumps(temp)
 
-        client.publish("iot/rpi4/temp", msg_bytes)
+        client.publish("iot/rpi4/temp", msg_bytes, qos=qos)
 
         _temp_messages_amount += 1
         time.sleep(15)
@@ -39,7 +39,7 @@ async def status_task(client: Client) -> None:
         status = simulate_status()
         msg_bytes = json.dumps(status)
 
-        client.publish("iot/status/rpi4", msg_bytes)
+        client.publish("iot/status/rpi4", msg_bytes, qos=1)
 
         _status_messages_amount += 1
         time.sleep(.1)

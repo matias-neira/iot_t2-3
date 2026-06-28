@@ -25,7 +25,6 @@ async def publisher(event: asyncio.Event) -> None:
         accel_qos = accel_config.get("qos", 0)
         temp_qos = temp_config.get("qos", 1)
 
-
         tasks = asyncio.gather(
             accel_task(client, accel_enabled, accel_qos),
             temp_task(client, temp_enabled, temp_qos),
@@ -35,3 +34,4 @@ async def publisher(event: asyncio.Event) -> None:
 
         await event.wait()
         event.clear()
+        tasks.cancel()

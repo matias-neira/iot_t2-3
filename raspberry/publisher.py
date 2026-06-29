@@ -5,8 +5,6 @@ from classes.Config import Config
 from utils.tasks import accel_task, temp_task, status_task, print_messages_by_topic
 
 async def publisher(event: asyncio.Event) -> None:
-    
-    #count = [0, 0, 0]
 
     def on_connect(client, userdata, flags, reason_code, properties):
         print(f"Connected to broker with code: {reason_code}")
@@ -16,8 +14,9 @@ async def publisher(event: asyncio.Event) -> None:
     client.connect("127.0.0.1", 1883, 60)
     client.loop_start()
 
+    config = Config()
+
     while True:
-        config = Config()
         accel_config = config.get_sensors_accel_config()
         temp_config = config.get_sensors_temp_config()
         accel_enabled = accel_config.get("enabled", True)
@@ -35,3 +34,4 @@ async def publisher(event: asyncio.Event) -> None:
         await event.wait()
         event.clear()
         tasks.cancel()
+        config.read_config()

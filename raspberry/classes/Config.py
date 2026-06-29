@@ -22,15 +22,9 @@ class Config:
     }
 
     def __init__(self) -> None:
-        try:
-            with open(self.__FILE_PATH, "r") as f:
-                config = json.load(f)
-
-        except:
-            config = self.__DEFAULT_CONFIG
-            with open(self.__FILE_PATH, "w") as f:
-                json.dump(config, f, indent=4)
-        self.__config = config
+        self.__config = {}
+        self.read_config()
+        
 
     def get_wifi_ssid(self) -> str: return self.__config.get("wifi_ssid", "IoT_Grupo1")
 
@@ -53,3 +47,14 @@ class Config:
         self.__config = self.__DEFAULT_CONFIG.copy()
         with open(self.__FILE_PATH, "w") as f:
             json.dump(self.__config, f, indent=4)
+
+    def read_config(self) -> dict:
+        try:
+            with open(self.__FILE_PATH, "r") as f:
+                config = json.load(f)
+
+        except:
+            config = self.__DEFAULT_CONFIG
+            with open(self.__FILE_PATH, "w") as f:
+                json.dump(config, f, indent=4)
+        self.__config = config

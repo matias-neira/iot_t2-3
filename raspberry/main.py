@@ -1,7 +1,7 @@
 import asyncio
 
-from .gui import gui
-from .publisher import publisher
+from gui import gui
+from publisher import publisher
 
 async def main():
     
@@ -12,4 +12,5 @@ async def main():
     )
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    pass
+    #asyncio.run(main())

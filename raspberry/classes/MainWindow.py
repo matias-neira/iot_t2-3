@@ -10,8 +10,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
 
-from .Signal import Signal
-from .Config import Config
+from classes.Signal import Signal
+from classes.Config import Config
 
 class MainWindow(QMainWindow):
     def __init__(self, event: asyncio.Event) -> None:
@@ -307,12 +307,12 @@ class MainWindow(QMainWindow):
 
         self.__event.set()
 
-    def get_accel_signal(self) -> Signal:
-        return self.__signals.accel_data_signal
-    
-    def get_temp_signal(self) -> Signal:
-        return self.__signals.temp_data_signal
-    
-    def get_status_signal(self) -> Signal:
-        return self.__signals.status_data_signal
+    def emit_accel_signal(self, timestamp, ax, ay, az) -> None:
+        self.__signals.accel_data_signal.emit(timestamp, ax, ay, az)
+
+    def emit_temp_signal(self, timestamp, temperature) -> None:
+        self.__signals.temp_data_signal.emit(timestamp, temperature)
+
+    def emit_status_signal(self, timestamp, status) -> None:
+        self.__signals.status_data_signal.emit(timestamp, status)
         

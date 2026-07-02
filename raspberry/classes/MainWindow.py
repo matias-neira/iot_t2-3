@@ -229,13 +229,12 @@ class MainWindow(QMainWindow):
         self.__temp_plot.clear()
         self.__temp_plot.plot(list(range(len(plot_data))), plot_data, pen='r')
         
-    def __update_state_data(self, info: str) -> None:
+    def __update_state_data(self, timestamp: int, status: int) -> None:
 
-        timestamp = datetime.now().timestamp()
         if self.__recording:
-            self.__saved_data.append(((info, timestamp), 2))
+            self.__saved_data.append(((status, timestamp), 2))
 
-        self.__status_label.setText(f"Estado: {info}. Última actualización: {timestamp}")
+        self.__status_label.setText(f"Estado: {status}. Última actualización: {timestamp}")
 
     def __on_record_button_pressed(self) -> None:
 
@@ -307,12 +306,12 @@ class MainWindow(QMainWindow):
 
         self.__event.set()
 
-    def emit_accel_signal(self, timestamp, ax, ay, az) -> None:
+    def emit_accel_signal(self, timestamp: int, ax: float, ay: float, az: float) -> None:
         self.__signals.accel_data_signal.emit(timestamp, ax, ay, az)
 
-    def emit_temp_signal(self, timestamp, temperature) -> None:
+    def emit_temp_signal(self, timestamp: int, temperature: float) -> None:
         self.__signals.temp_data_signal.emit(timestamp, temperature)
 
-    def emit_status_signal(self, timestamp, status) -> None:
+    def emit_status_signal(self, timestamp: int, status: int) -> None:
         self.__signals.status_data_signal.emit(timestamp, status)
         

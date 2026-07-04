@@ -24,11 +24,11 @@ async def subscribe(window: MainWindow) -> None:
             envelope = pb.SensorEnvelope()
             envelope.ParseFromString(msg.payload)
 
-            if envelope.WhichOneof("payload") == "accel":
+            if topic == "iot/rpi4/accel":
                 accel = envelope.accel
                 window.emit_accel_signal(accel.timestamp, accel.ax, accel.ay, accel.az)
             
-            elif envelope.WhichOneof("payload") == "temp":
+            elif topic == "iot/rpi4/temp":
                 temp = envelope.temp
                 window.emit_temp_signal(temp.timestamp, temp.temp)
 

@@ -1,5 +1,4 @@
 import time
-import json
 from paho.mqtt.client import Client
 
 from utils.data import simulate_accel, simulate_temp, simulate_status
@@ -44,9 +43,9 @@ async def status_task(client: Client) -> None:
 async def print_messages_by_topic() -> None:
     while True:
         print(
-            "====================", "\n",
-            f"Accel messages: {_accel_messages_amount}", "\n",
-            f"Temp messages: {_temp_messages_amount}", "\n",
-            f"Status messages: {_status_messages_amount}"
+            "====================\n",
+            f"Accel messages: {_accel_messages_amount}\n",
+            f"Temp messages: {_temp_messages_amount}\n",
+            f"Status messages: {_status_messages_amount}\n"
         )
         time.sleep(10)

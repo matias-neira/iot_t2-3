@@ -13,7 +13,7 @@ async def subscribe(window: MainWindow) -> None:
 
     def on_message(client: mqtt.Client, userdata: None, msg: mqtt.MQTTMessage):
         topic = msg.topic
-        print(f"Received message on topic '{topic}': {msg.payload}")
+        #print(f"Received message on topic '{topic}': {msg.payload}")
 
         if topic == "iot/status/rpi4":
             status: dict = json.loads(msg.payload)

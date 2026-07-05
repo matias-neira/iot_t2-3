@@ -25,4 +25,4 @@ async def gui() -> None:
         loop.run_forever()
 
 if __name__ == "__main__":
-    asyncio.run(gui(asyncio.Event()))
+    asyncio.run(gui())

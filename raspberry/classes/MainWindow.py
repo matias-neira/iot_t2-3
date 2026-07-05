@@ -306,6 +306,7 @@ class MainWindow(QMainWindow):
         }
 
         self.__config.save_config(new_config)
+        self.__event.set()
 
     def __on_reload_config_button_pressed(self) -> None:
         self.__set_config_values()
@@ -319,9 +320,6 @@ class MainWindow(QMainWindow):
 
         self.__temp_enabled_checkbox.setChecked(temp_config.get("enabled"))
         self.__temp_qos_combo.setCurrentText(str(temp_config.get("qos")))
-
-        print("Configuration values set in GUI.")
-        self.__event.set()
 
     def __update_status(self) -> None:
         now_ms = time.monotonic_ns() // 1_000_000

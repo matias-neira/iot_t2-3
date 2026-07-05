@@ -3,11 +3,14 @@ from PyQt5.QtWidgets import QApplication
 from qasync import QEventLoop
 import asyncio
 
+from publisher import publisher
 from classes.MainWindow import MainWindow
 from utils.subscriptions import subscribe, update_status
 
-async def gui(event: asyncio.Event) -> None:
-    
+async def gui() -> None:
+
+    event = asyncio.Event()
+
     app = QApplication([])
     window = MainWindow(event)
     window.show()
@@ -16,6 +19,7 @@ async def gui(event: asyncio.Event) -> None:
     asyncio.set_event_loop(loop)
 
     with loop:
+        loop.create_task(publisher(event))
         loop.create_task(subscribe(window))
         loop.create_task(update_status(window))
         loop.run_forever()

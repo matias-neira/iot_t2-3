@@ -154,6 +154,10 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(self.__tab_widget)
         self.setCentralWidget(container)
 
+    def closeEvent(self, event) -> None:
+        self.__close_event.set()
+        super().closeEvent(event)
+
     def __on_range_button_pressed(self) -> None:
         value, ok = QInputDialog.getInt(
             self,

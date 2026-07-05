@@ -10,7 +10,7 @@ async def publisher(event: asyncio.Event) -> None:
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect
-    client.connect("127.0.0.1", 1883, 60)
+    client.connect("192.168.10.1", 1883, 60)
     client.loop_start()
 
     try:

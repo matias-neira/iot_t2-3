@@ -39,7 +39,7 @@ async def subscribe(window: MainWindow) -> None:
 
     while window.is_alive():
         try:
-            client.connect("127.0.0.1", 1883, 60)
+            client.connect("192.168.10.1", 1883, 60)
             client.loop_start()
 
             await window.wait_for_close()

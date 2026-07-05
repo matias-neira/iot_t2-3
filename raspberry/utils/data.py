@@ -28,7 +28,7 @@ def simulate_accel() -> str:
     accel.az = main_val * _ATTENUATION + (random.random() - .5) * .5
     envelope = pb.SensorEnvelope()
     envelope.source_id = "rpi4"
-    envelope.payload.CopyFrom(accel)
+    envelope.accel.CopyFrom(accel)
     return envelope.SerializeToString()
 
 def simulate_temp() -> str:
@@ -43,7 +43,7 @@ def simulate_temp() -> str:
       temp.temperature = _temp
       envelope = pb.SensorEnvelope()
       envelope.source_id = "rpi4"
-      envelope.payload.CopyFrom(temp)
+      envelope.temp.CopyFrom(temp)
       return envelope.SerializeToString()
 
 def simulate_status() -> str:

@@ -23,6 +23,9 @@ async def update_tasks(event: asyncio.Event) -> None:
         accel_config = config.get_sensors_accel_config()
         temp_config = config.get_sensors_temp_config()
 
+        print(f"Accel config: {accel_config}")
+        print(f"Temp config: {temp_config}")
+
         if accel_config.get("enabled", True):
             _enabled_accel.set()
         else:

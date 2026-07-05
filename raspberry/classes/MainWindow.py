@@ -280,7 +280,7 @@ class MainWindow(QMainWindow):
                     writer.writerow([data[1], 'ESP32', '', temp_qos, '', '', '', data[0]])
 
                 elif data_type == 2:
-                    writer.writerow([data[1], 'Raspberry', data[2], 1, '', '', '', '', ''])
+                    writer.writerow([data[1], 'Raspberry', data[0], 1, '', '', '', '', ''])
 
         self.__saved_data = []
 

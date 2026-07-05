@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 import json
+import asyncio
 
 from classes.MainWindow import MainWindow
 from proto import sensors_pb2 as pb
@@ -15,7 +16,7 @@ async def subscribe(window: MainWindow) -> None:
         print(f"Received message on topic '{topic}': {msg.payload}")
 
         if topic == "iot/status/rpi4":
-            status = json.loads(msg.payload)
+            status: dict = json.loads(msg.payload)
             timestamp = status.get("timestamp")
             status_value = status.get("status")
             window.emit_status_signal(timestamp, status_value)
@@ -36,11 +37,22 @@ async def subscribe(window: MainWindow) -> None:
     client.on_connect = on_connect
     client.on_message = on_message
 
-    while True:
+    while window.is_alive():
         try:
             client.connect("127.0.0.1", 1883, 60)
-            client.loop_forever()
+            client.loop_start()
+
+            await window.wait_for_close()
 
         except Exception as e:
             print(f"Error occurred: {e}")
 
+        finally:
+            client.loop_stop()
+            client.disconnect()
+            await asyncio.sleep(5)
+
+async def update_status(window: MainWindow) -> None:
+    while window.is_alive():
+        window.emit_update_status_signal()
+        await asyncio.sleep(1)

@@ -4,7 +4,7 @@ from qasync import QEventLoop
 import asyncio
 
 from classes.MainWindow import MainWindow
-from utils.subscriptions import subscribe
+from utils.subscriptions import subscribe, update_status
 
 async def gui(event: asyncio.Event) -> None:
     
@@ -15,13 +15,10 @@ async def gui(event: asyncio.Event) -> None:
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
 
-    asyncio.gather(
-        subscribe(window),
-    )
-    
     with loop:
+        loop.create_task(subscribe(window))
+        loop.create_task(update_status(window))
         loop.run_forever()
 
 if __name__ == "__main__":
-    event = asyncio.Event()
-    asyncio.run(gui(event))
+    asyncio.run(gui(asyncio.Event()))

@@ -25,7 +25,7 @@
 
 #define BROKER_IP "192.168.0.10"
 #define BROKER_PORT "1883"
-#define MQTT_TOPIC "iot/rpi4/+"
+#define MQTT_TOPIC "#"
 
 SemaphoreHandle_t sem;
 const uint8_t max_retries = 5;
@@ -36,7 +36,7 @@ void handle_mqtt_data(const char *topic, const uint8_t *data, int len) {
     pb_istream_t stream = pb_istream_from_buffer(data, len);
 
     if (!pb_decode(&stream, iot_SensorEnvelope_fields, &env)) {
-        ESP_LOGE(TAG, "Decode failed : %s", PB_GET_ERROR (&stream));
+        ESP_LOGE(TAG, "Decode failed: %s", PB_GET_ERROR (&stream));
         return;
     }
 

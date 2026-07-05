@@ -1,4 +1,5 @@
 import asyncio
+import time
 from math import sqrt
 import csv
 from datetime import datetime
@@ -6,7 +7,8 @@ import pyqtgraph as pg
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, 
     QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QGroupBox, QInputDialog, QTabWidget, QCheckBox, QComboBox
+    QGroupBox, QInputDialog, QTabWidget, QCheckBox, QComboBox,
+    QTableWidget, QTableWidgetItem, QSizePolicy, QHeaderView
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
 
@@ -18,6 +20,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.__event = event
+        self.__close_event = asyncio.Event()
 
         self.__config = Config()
         self.__signals = Signal()
@@ -27,6 +30,7 @@ class MainWindow(QMainWindow):
         self.__signals.accel_data_signal.connect(self.__update_accel_data)
         self.__signals.temp_data_signal.connect(self.__update_temp_data)
         self.__signals.status_data_signal.connect(self.__update_state_data)
+        self.__signals.update_status_signal.connect(self.__update_status)
 
         self.setWindowTitle("Raspberry BLE Client")
         self.setGeometry(100, 100, 800, 600)
@@ -40,6 +44,7 @@ class MainWindow(QMainWindow):
         self.__min_time = 2000
         self.__accel_data = []
         self.__accel_message_count = 0
+        self.__accel_last_timestamp = None
         self.__accel_plot = pg.PlotWidget(title="Gráfico de Aceleración")
         self.__accel_plot.setFixedSize(760, 300)
         self.__accel_plot.addLegend()
@@ -49,6 +54,7 @@ class MainWindow(QMainWindow):
 
         self.__temp_data = []
         self.__temp_message_count = 0
+        self.__temp_last_timestamp = None
         self.__temp_plot = pg.PlotWidget(title="Gráfico de Temperatura")
         self.__temp_plot.setFixedSize(760, 300)
         self.__temp_plot.setLabel('left', 'Temperatura (°C)')
@@ -63,7 +69,6 @@ class MainWindow(QMainWindow):
         self.__range_button.clicked.connect(self.__on_range_button_pressed)
 
         self.__temp_label = QLabel("Temperatura: N/A", self)
-        self.__status_label = QLabel("Estado: N/A", self)
 
         self.__rms_label = QLabel("RMSx: N/A | RMSy: N/A | RMSz: N/A", self)
         self.__peak_label = QLabel("Peak+ X: N/A | Peak+ Y: N/A | Peak+ Z: N/A", self)
@@ -79,8 +84,24 @@ class MainWindow(QMainWindow):
         temp_layout = QVBoxLayout(self.__temp_tab)
         temp_layout.addWidget(self.__temp_label)
         temp_layout.addWidget(self.__temp_plot)
+        
         status_layout = QVBoxLayout(self.__status_tab)
-        status_layout.addWidget(self.__status_label)
+        self.__status_table = QTableWidget(2, 4, self)
+        self.__status_table.setHorizontalHeaderLabels([
+            "Tópico",
+            "QoS activo",
+            "Último mensaje (s atrás)",
+            "Mensajes recibidos",
+        ])
+        self.__status_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.__status_table.verticalHeader().setVisible(False)
+        self.__status_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.__status_table.setSelectionMode(QTableWidget.NoSelection)
+        self.__status_table.setFocusPolicy(Qt.NoFocus)
+        self.__status_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.__status_table.setItem(0, 0, QTableWidgetItem("Acelerómetro"))
+        self.__status_table.setItem(1, 0, QTableWidgetItem("Temperatura"))
+        status_layout.addWidget(self.__status_table, 1)
 
         self.__accel_enabled_checkbox = QCheckBox("Acelerómetro habilitado", self)
         self.__accel_qos_combo = QComboBox(self)
@@ -134,7 +155,11 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
         self.__alive = True
-        self.destroyed.connect(self._on_destroyed)
+
+    def closeEvent(self, event) -> None:
+        self.__alive = False
+        self.__close_event.set()
+        super().closeEvent(event)
 
     def __on_range_button_pressed(self) -> None:
         value, ok = QInputDialog.getInt(
@@ -151,15 +176,13 @@ class MainWindow(QMainWindow):
             if self.__accel_data:
                 self.__plot_accel_data(self.__accel_data[-1][3])
 
-    def _on_destroyed(self, obj=None) -> None:
-        self.__alive = False
-
     def is_alive(self) -> bool:
         return self.__alive
 
     def __update_accel_data(self, timestamp: int, x: float, y: float, z: float) -> None:
 
         self.__accel_message_count += 1
+        self.__accel_last_timestamp = timestamp
 
         if self.__recording:
             self.__saved_data.append(((x, y, z, timestamp), 0))
@@ -215,6 +238,7 @@ class MainWindow(QMainWindow):
     def __update_temp_data(self, timestamp: int, temp: float) -> None:
 
         self.__temp_message_count += 1
+        self.__temp_last_timestamp = timestamp
 
         if self.__recording:
             self.__saved_data.append(((temp, timestamp), 1))
@@ -233,8 +257,6 @@ class MainWindow(QMainWindow):
 
         if self.__recording:
             self.__saved_data.append(((status, timestamp), 2))
-
-        self.__status_label.setText(f"Estado: {status}. Última actualización: {timestamp}")
 
     def __on_record_button_pressed(self) -> None:
 
@@ -306,6 +328,44 @@ class MainWindow(QMainWindow):
 
         self.__event.set()
 
+    def __update_status(self) -> None:
+        now_ms = time.monotonic_ns() // 1_000_000
+
+        accel_config = self.__config.get_sensors_accel_config()
+        temp_config = self.__config.get_sensors_temp_config()
+
+        status_rows = [
+            (
+                "Acelerómetro",
+                accel_config.get("qos", 0),
+                self.__accel_last_timestamp,
+                self.__accel_message_count,
+            ),
+            (
+                "Temperatura",
+                temp_config.get("qos", 0),
+                self.__temp_last_timestamp,
+                self.__temp_message_count,
+            ),
+        ]
+
+        for row, (topic, qos, last_timestamp, message_count) in enumerate(status_rows):
+            self.__status_table.setItem(row, 0, QTableWidgetItem(topic))
+            self.__status_table.setItem(row, 1, QTableWidgetItem(str(qos)))
+
+            if last_timestamp is None:
+                last_text = "N/A"
+
+            else:
+                elapsed_s = max(0.0, (now_ms - last_timestamp) / 1000)
+                last_text = f"{elapsed_s:.1f}"
+
+            self.__status_table.setItem(row, 2, QTableWidgetItem(last_text))
+            self.__status_table.setItem(row, 3, QTableWidgetItem(str(message_count)))
+
+    def wait_for_close(self) -> asyncio.Future:
+        return self.__close_event.wait()
+
     def emit_accel_signal(self, timestamp: int, ax: float, ay: float, az: float) -> None:
         self.__signals.accel_data_signal.emit(timestamp, ax, ay, az)
 
@@ -314,4 +374,6 @@ class MainWindow(QMainWindow):
 
     def emit_status_signal(self, timestamp: int, status: int) -> None:
         self.__signals.status_data_signal.emit(timestamp, status)
-        
+    
+    def emit_update_status_signal(self) -> None:
+        self.__signals.update_status_signal.emit()

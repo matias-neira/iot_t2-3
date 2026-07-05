@@ -51,4 +51,4 @@ def simulate_status() -> str:
             "timestamp": _timestamp_ms(),
             "status": 0
       }
-      return json.dumps(status)
+      return json.dumps(status).replace(" ", "")

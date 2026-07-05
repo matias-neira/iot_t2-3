@@ -37,22 +37,16 @@ async def subscribe(window: MainWindow) -> None:
     client.on_connect = on_connect
     client.on_message = on_message
 
-    while window.is_alive():
+    while True:
         try:
             client.connect("192.168.10.1", 1883, 60)
-            client.loop_start()
-
-            await window.wait_for_close()
+            client.loop_forever()
 
         except Exception as e:
             print(f"Error occurred: {e}")
-
-        finally:
-            client.loop_stop()
-            client.disconnect()
             await asyncio.sleep(5)
 
 async def update_status(window: MainWindow) -> None:
-    while window.is_alive():
+    while True:
         window.emit_update_status_signal()
         await asyncio.sleep(1)

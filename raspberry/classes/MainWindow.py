@@ -154,13 +154,6 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(self.__tab_widget)
         self.setCentralWidget(container)
 
-        self.__alive = True
-
-    def closeEvent(self, event) -> None:
-        self.__alive = False
-        self.__close_event.set()
-        super().closeEvent(event)
-
     def __on_range_button_pressed(self) -> None:
         value, ok = QInputDialog.getInt(
             self,
@@ -175,9 +168,6 @@ class MainWindow(QMainWindow):
             self.__min_time = value
             if self.__accel_data:
                 self.__plot_accel_data(self.__accel_data[-1][3])
-
-    def is_alive(self) -> bool:
-        return self.__alive
 
     def __update_accel_data(self, timestamp: int, x: float, y: float, z: float) -> None:
 

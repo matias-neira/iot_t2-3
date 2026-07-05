@@ -320,6 +320,7 @@ class MainWindow(QMainWindow):
         self.__temp_enabled_checkbox.setChecked(temp_config.get("enabled"))
         self.__temp_qos_combo.setCurrentText(str(temp_config.get("qos")))
 
+        print("Configuration values set in GUI.")
         self.__event.set()
 
     def __update_status(self) -> None:

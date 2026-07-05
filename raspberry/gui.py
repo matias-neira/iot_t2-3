@@ -7,7 +7,7 @@ from publisher import publisher
 from classes.MainWindow import MainWindow
 from utils.subscriptions import subscribe, update_status
 
-async def gui() -> None:
+def gui() -> None:
 
     event = asyncio.Event()
 
@@ -25,4 +25,4 @@ async def gui() -> None:
         loop.run_forever()
 
 if __name__ == "__main__":
-    asyncio.run(gui())
+    gui()

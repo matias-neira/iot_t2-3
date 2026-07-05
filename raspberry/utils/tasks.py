@@ -1,5 +1,4 @@
 import asyncio
-import time
 from paho.mqtt.client import Client
 
 from classes.Config import Config
@@ -52,7 +51,7 @@ async def accel_task(client: Client) -> None:
         client.publish("iot/rpi4/accel", msg_bytes, qos=_accel_qos)
 
         _accel_messages_amount += 1
-        time.sleep(.02)
+        await asyncio.sleep(.02)
 
 async def temp_task(client: Client) -> None:
     global _temp_messages_amount
@@ -64,7 +63,7 @@ async def temp_task(client: Client) -> None:
         client.publish("iot/rpi4/temp", msg_bytes, qos=_temp_qos)
 
         _temp_messages_amount += 1
-        time.sleep(15)
+        await asyncio.sleep(15)
 
 async def status_task(client: Client) -> None:
     global _status_messages_amount
@@ -75,7 +74,7 @@ async def status_task(client: Client) -> None:
         client.publish("iot/status/rpi4", msg_bytes, qos=1)
 
         _status_messages_amount += 1
-        time.sleep(.1)
+        await asyncio.sleep(.1)
 
 async def print_messages_by_topic() -> None:
     while True:
@@ -85,4 +84,4 @@ async def print_messages_by_topic() -> None:
             f"Temp messages: {_temp_messages_amount}\n",
             f"Status messages: {_status_messages_amount}\n"
         )
-        time.sleep(10)
+        await asyncio.sleep(10)

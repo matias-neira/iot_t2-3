@@ -22,7 +22,7 @@ def simulate_accel() -> str:
     _phase += 0.01
     main_val = _ACCEL_RANGE_G * math.sin(_phase) + random.random() - .5
     accel = pb.AccelSample()
-    accel.timestamp = _timestamp_ms()
+    accel.timestamp_ms = _timestamp_ms()
     accel.ax = main_val
     accel.ay = main_val * _ATTENUATION + (random.random() - .5) * .5
     accel.az = main_val * _ATTENUATION + (random.random() - .5) * .5
@@ -39,7 +39,7 @@ def simulate_temp() -> str:
       if _temp < _TEMP_MIN: _temp = _TEMP_MIN
       if _temp > _TEMP_MAX: _temp = _TEMP_MAX
       temp = pb.TempSample()
-      temp.timestamp = _timestamp_ms()
+      temp.timestamp_ms = _timestamp_ms()
       temp.temp = _temp
       envelope = pb.SensorEnvelope()
       envelope.source_id = "rpi4"

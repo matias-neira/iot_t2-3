@@ -274,13 +274,13 @@ class MainWindow(QMainWindow):
 
             for data, data_type in self.__saved_data:
                 if data_type == 0:
-                    writer.writerow([data[3], 'ESP32', '', accel_qos, data[0], data[1], data[2], ''])
+                    writer.writerow([data[3], 'rpi4', 'iot/rpi4/accel', accel_qos, data[0], data[1], data[2], ''])
 
                 elif data_type == 1:
-                    writer.writerow([data[1], 'ESP32', '', temp_qos, '', '', '', data[0]])
+                    writer.writerow([data[1], 'rpi4', 'iot/rpi4/temp', temp_qos, '', '', '', data[0]])
 
                 elif data_type == 2:
-                    writer.writerow([data[1], 'Raspberry', data[0], 1, '', '', '', '', ''])
+                    writer.writerow([data[1], 'rpi4', 'iot/status/rpi4', 1, '', '', '', '', ''])
 
         self.__saved_data = []
 

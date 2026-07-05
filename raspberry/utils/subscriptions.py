@@ -26,12 +26,12 @@ async def subscribe(window: MainWindow) -> None:
             envelope.ParseFromString(msg.payload)
 
             if topic == "iot/rpi4/accel":
-                accel = envelope.accel
-                window.emit_accel_signal(accel.timestamp, accel.ax, accel.ay, accel.az)
+                accel = envelope.payload
+                window.emit_accel_signal(accel.timestamp_ms, accel.ax, accel.ay, accel.az)
             
             elif topic == "iot/rpi4/temp":
-                temp = envelope.temp
-                window.emit_temp_signal(temp.timestamp, temp.temp)
+                temp = envelope.payload
+                window.emit_temp_signal(temp.timestamp_ms, temp.temperature)
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect

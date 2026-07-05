@@ -2,7 +2,7 @@ import json
 
 class Config:
 
-    __FILE_PATH = "raspberry/config.json"
+    __FILE_PATH = "config.json"
     __DEFAULT_CONFIG = {
         "wifi_ssid": "IoT_Grupo1",
         "wifi_password": "password1234",

@@ -13,10 +13,14 @@ async def publisher(event: asyncio.Event) -> None:
     client.connect("127.0.0.1", 1883, 60)
     client.loop_start()
 
-    await asyncio.gather(
-        update_tasks(event),
-        accel_task(client),
-        temp_task(client),
-        status_task(client),
-        print_messages_by_topic()            
-    )
+    try:
+        await asyncio.gather(
+            update_tasks(event),
+            accel_task(client),
+            temp_task(client),
+            status_task(client),
+            print_messages_by_topic()            
+        )
+    
+    except KeyboardInterrupt:
+        print("Publisher interrupted. Stopping...")

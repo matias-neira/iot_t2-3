@@ -243,7 +243,7 @@ class MainWindow(QMainWindow):
         if self.__recording:
             self.__saved_data.append(((temp, timestamp), 1))
 
-        if len(self.__temp_data) >= 2000:
+        if len(self.__temp_data) >= 30:
             self.__temp_data.pop(0)
         self.__temp_data.append(temp)
 

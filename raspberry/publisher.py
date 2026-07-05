@@ -6,7 +6,7 @@ from utils.tasks import accel_task, temp_task, status_task, print_messages_by_to
 async def publisher(event: asyncio.Event) -> None:
 
     def on_connect(client, userdata, flags, reason_code, properties):
-        print(f"Connected to broker with code: {reason_code}")
+        print(f"Publishing in broker with code: {reason_code}")
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect

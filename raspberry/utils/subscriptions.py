@@ -8,7 +8,7 @@ from proto import sensors_pb2 as pb
 async def subscribe(window: MainWindow) -> None:
 
     def on_connect(client: mqtt.Client, userdata: None, flags: None, reason_code: int, properties: None):
-        print(f"Connected to broker with code: {reason_code}")
+        print(f"Reading from broker with code: {reason_code}")
         client.subscribe("#")
 
     def on_message(client: mqtt.Client, userdata: None, msg: mqtt.MQTTMessage):

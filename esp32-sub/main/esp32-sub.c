@@ -65,14 +65,40 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
             break;
     
         case MQTT_EVENT_DATA: {
-            uint32_t *temp = (uint32_t *)event->data;
-            printf("%.*s: %ld\n", event->topic_len, event->topic, *temp);
+            handle_mqtt_data(event->topic, (const uint8_t *)event->data, event->data_len);
     
         default:
             break;
         }
     }
 }
+
+void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
+    if (event_base == WIFI_EVENT) {
+      if (event_id == WIFI_EVENT_STA_START) {
+        esp_wifi_connect();
+  
+      } else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        printf("Error al conectar, intento %d/%d\n", retries, max_retries);
+  
+        if (retries < max_retries) {
+          esp_wifi_connect();
+          retries++;
+  
+        } else {
+          xSemaphoreGive(sem);
+        }
+      }
+  
+    } else if (event_base == IP_EVENT) {
+      if (event_id == IP_EVENT_STA_GOT_IP) {
+        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+        printf("IP obtenida: " IPSTR "\n", IP2STR(&event->ip_info.ip));
+  
+        xSemaphoreGive(sem);
+      }
+    }
+  }
 
 void app_main(void) {
     sem = xSemaphoreCreateBinary();
@@ -88,10 +114,10 @@ void app_main(void) {
 
     esp_event_handler_instance_t wifi_any_evh;
 
-    esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &handle_mqtt_data, NULL, &wifi_any_evh);
+    esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL, &wifi_any_evh);
 
     esp_event_handler_instance_t got_ip_evh;
-    esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &handle_mqtt_data, NULL, &got_ip_evh);
+    esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &wifi_event_handler, NULL, &got_ip_evh);
 
     esp_wifi_set_mode(WIFI_MODE_STA);
     wifi_config_t wifi_config = {

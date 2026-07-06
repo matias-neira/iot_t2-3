@@ -37,7 +37,7 @@ async def update_tasks(event: asyncio.Event) -> None:
         _temp_qos = temp_config.get("qos", 1)
 
         await event.wait()
-        print("Configuration updated. Reloading...")
+        
         event.clear()
         config.read_config()
 

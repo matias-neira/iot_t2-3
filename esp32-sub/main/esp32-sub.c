@@ -15,6 +15,7 @@
 #include <esp_system.h>
 #include <esp_random.h>
 #include <esp_task.h>
+#include <esp_log.h>
 
 #include <nvs_flash.h>
 #include <mqtt_client.h>

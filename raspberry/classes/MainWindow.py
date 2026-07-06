@@ -2,15 +2,14 @@ import asyncio
 import time
 from math import sqrt
 import csv
-from datetime import datetime
 import pyqtgraph as pg
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, 
-    QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QGroupBox, QInputDialog, QTabWidget, QCheckBox, QComboBox,
-    QTableWidget, QTableWidgetItem, QSizePolicy, QHeaderView
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QPushButton, QLabel, QGroupBox, QInputDialog,
+    QTabWidget, QCheckBox, QComboBox, QTableWidget,
+    QTableWidgetItem, QSizePolicy, QHeaderView
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QObject
+from PyQt5.QtCore import Qt
 
 from classes.Signal import Signal
 from classes.Config import Config

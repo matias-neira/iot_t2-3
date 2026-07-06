@@ -99,7 +99,7 @@ class MainWindow(QMainWindow):
         self.__status_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.__status_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self.__status_table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.__status_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.__status_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         self.__status_table.setItem(0, 0, QTableWidgetItem("Acelerómetro"))
         self.__status_table.setItem(1, 0, QTableWidgetItem("Temperatura"))
         status_layout.addWidget(self.__status_table, 1)

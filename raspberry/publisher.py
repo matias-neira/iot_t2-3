@@ -10,17 +10,21 @@ async def publisher(event: asyncio.Event) -> None:
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect
-    client.connect("192.168.10.1", 1883, 60)
-    client.loop_start()
 
-    try:
-        await asyncio.gather(
-            update_tasks(event),
-            accel_task(client),
-            temp_task(client),
-            status_task(client),
-            print_messages_by_topic()            
-        )
+    while True:
+        try:
+            client.connect("192.168.10.1", 1883, 60)
+            client.loop_start()
+
     
-    except KeyboardInterrupt:
-        print("Publisher interrupted. Stopping...")
+            await asyncio.gather(
+                update_tasks(event),
+                accel_task(client),
+                temp_task(client),
+                status_task(client),
+                print_messages_by_topic()            
+            )
+
+        except Exception as e:
+            print(f"Error in publisher: {e}")
+            await asyncio.sleep(5)

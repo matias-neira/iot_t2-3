@@ -22,7 +22,7 @@ esp32/partition_table/
 esp32/config/project_description.json
 
 # Python
-.venv/
+.venv*/
 *.pyc
 __pycache__/
 *.pyo

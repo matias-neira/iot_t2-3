@@ -1,5 +1,5 @@
 import asyncio
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 from qasync import QEventLoop
 import asyncio
 

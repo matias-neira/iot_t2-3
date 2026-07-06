@@ -4,13 +4,14 @@ from math import sqrt
 import csv
 from datetime import datetime
 import pyqtgraph as pg
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, 
     QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
     QGroupBox, QInputDialog, QTabWidget, QCheckBox, QComboBox,
-    QTableWidget, QTableWidgetItem, QSizePolicy, QHeaderView
+    QTableWidget, QTableWidgetItem, QSizePolicy, QHeaderView,
+    QAbstractItemView
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QObject
+from PyQt6.QtCore import Qt, pyqtSignal, QObject
 
 from classes.Signal import Signal
 from classes.Config import Config
@@ -93,11 +94,11 @@ class MainWindow(QMainWindow):
             "Último mensaje (s atrás)",
             "Mensajes recibidos",
         ])
-        self.__status_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.__status_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.__status_table.verticalHeader().setVisible(False)
-        self.__status_table.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.__status_table.setSelectionMode(QTableWidget.NoSelection)
-        self.__status_table.setFocusPolicy(Qt.NoFocus)
+        self.__status_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.__status_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
+        self.__status_table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.__status_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.__status_table.setItem(0, 0, QTableWidgetItem("Acelerómetro"))
         self.__status_table.setItem(1, 0, QTableWidgetItem("Temperatura"))
@@ -135,8 +136,8 @@ class MainWindow(QMainWindow):
         config_layout.addWidget(accel_sensor_box)
         config_layout.addWidget(temp_sensor_box)
         config_layout.addStretch()
-        config_layout.addWidget(self.__apply_config_button, alignment=Qt.AlignRight)
-        config_layout.addWidget(self.__reload_config_button, alignment=Qt.AlignRight)
+        config_layout.addWidget(self.__apply_config_button, alignment=Qt.AlignmentFlag.AlignRight)
+        config_layout.addWidget(self.__reload_config_button, alignment=Qt.AlignmentFlag.AlignRight)
 
         self.__tab_widget.addTab(self.__accel_tab, "Aceleración")
         self.__tab_widget.addTab(self.__temp_tab, "Temperatura")

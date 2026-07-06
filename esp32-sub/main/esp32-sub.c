@@ -23,7 +23,7 @@
 #include "credentials.h"
 #include "sensors.pb.h"
 
-#define BROKER_IP "192.168.0.10"
+#define BROKER_IP "192.168.10.1"
 #define BROKER_PORT "1883"
 #define MQTT_TOPIC "#"
 

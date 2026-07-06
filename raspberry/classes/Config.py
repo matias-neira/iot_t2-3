@@ -24,7 +24,6 @@ class Config:
     def __init__(self) -> None:
         self.__config = {}
         self.read_config()
-        
 
     def get_wifi_ssid(self) -> str: return self.__config.get("wifi_ssid", "IoT_Grupo1")
 

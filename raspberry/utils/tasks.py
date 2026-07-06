@@ -78,10 +78,10 @@ async def status_task(client: Client) -> None:
 
 async def print_messages_by_topic() -> None:
     while True:
+        await asyncio.sleep(10)
         print(
             "=========================\n",
             f"Accel messages: {_accel_messages_amount}\n",
             f"Temp messages: {_temp_messages_amount}\n",
             f"Status messages: {_status_messages_amount}\n"
         )
-        await asyncio.sleep(10)

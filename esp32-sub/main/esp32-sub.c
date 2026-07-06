@@ -31,6 +31,18 @@ SemaphoreHandle_t sem;
 const uint8_t max_retries = 5;
 uint8_t retries = 0;
 
+uint64_t accel_count = 0;
+uint64_t temp_count = 0;
+
+void print_counters(void *pvParameters) {
+    for(;;) {
+        vTaskDelay(pdMS_TO_TICKS(30000));
+        printf("===================================\n");
+        printf("Accel messages: %llu\n", accel_count);
+        printf("Temp messages: %llu\n", temp_count);
+    }
+}
+
 void handle_mqtt_data(const char *topic, const uint8_t *data, int len) {
     iot_SensorEnvelope env = iot_SensorEnvelope_init_zero;
     pb_istream_t stream = pb_istream_from_buffer(data, len);
@@ -41,12 +53,14 @@ void handle_mqtt_data(const char *topic, const uint8_t *data, int len) {
     }
 
     if (env.which_payload == iot_SensorEnvelope_accel_tag) {
+        accel_count++;
         ESP_LOGI(TAG, "Accel: ax=%.2f ay=%.2f az=%.2f",
             env.payload.accel.ax,
             env.payload.accel.ay,
             env.payload.accel.az
         );
     } else if (env.which_payload == iot_SensorEnvelope_temp_tag) {
+        temp_count++;
         ESP_LOGI(TAG, "Temp: %.1fC", env.payload.temp.temperature);
     }
 }
@@ -75,30 +89,31 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
 
 void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
     if (event_base == WIFI_EVENT) {
-      if (event_id == WIFI_EVENT_STA_START) {
-        esp_wifi_connect();
+        if (event_id == WIFI_EVENT_STA_START) {
+            esp_wifi_connect();
   
-      } else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        printf("Error al conectar, intento %d/%d\n", retries, max_retries);
+        } else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
+            printf("Error al conectar, intento %d/%d\n", retries, max_retries);
   
-        if (retries < max_retries) {
-          esp_wifi_connect();
-          retries++;
-  
-        } else {
-          xSemaphoreGive(sem);
+            if (retries < max_retries) {
+                int backoff_time = 1 << retries;
+                sleep(backoff_time < 60 ? backoff_time : 60);
+                esp_wifi_connect();
+                retries++;
+            } else {
+                xSemaphoreGive(sem);
+            }
         }
-      }
   
     } else if (event_base == IP_EVENT) {
-      if (event_id == IP_EVENT_STA_GOT_IP) {
-        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        printf("IP obtenida: " IPSTR "\n", IP2STR(&event->ip_info.ip));
+        if (event_id == IP_EVENT_STA_GOT_IP) {
+            ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+            printf("IP obtenida: " IPSTR "\n", IP2STR(&event->ip_info.ip));
   
-        xSemaphoreGive(sem);
-      }
+            xSemaphoreGive(sem);
+        }
     }
-  }
+}
 
 void app_main(void) {
     sem = xSemaphoreCreateBinary();
@@ -141,6 +156,8 @@ void app_main(void) {
         esp_restart();
     }
     printf("Conectado con exito al AP %s\n", WIFI_AP_SSID);
+
+    xTaskCreate(print_counters, "print_counters", 4096, NULL, 5, NULL);
 
     // Publisher MQTT
     esp_mqtt_client_config_t mqtt_cfg = {

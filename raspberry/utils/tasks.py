@@ -62,6 +62,8 @@ async def temp_task(client: Client) -> None:
         await _enabled_temp.wait()
         msg_bytes = simulate_temp()
 
+        print("Publishing temp message with qos:", _temp_qos)
+
         client.publish("iot/rpi4/temp", msg_bytes, qos=_temp_qos)
 
         _temp_messages_amount += 1

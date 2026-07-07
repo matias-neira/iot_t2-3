@@ -36,6 +36,8 @@ async def update_tasks(event: asyncio.Event) -> None:
         _accel_qos = accel_config.get("qos", 0)
         _temp_qos = temp_config.get("qos", 1)
 
+        print("accel qos:", _accel_qos, "temp qos:", _temp_qos)
+
         await event.wait()
         
         event.clear()

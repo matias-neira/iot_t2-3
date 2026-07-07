@@ -71,7 +71,7 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
   
     switch (event_id) {
         case MQTT_EVENT_CONNECTED:
-            esp_mqtt_client_subscribe(event->client, MQTT_TOPIC, 0);
+            esp_mqtt_client_subscribe(event->client, MQTT_TOPIC, 2);
             break;
     
         case MQTT_EVENT_DISCONNECTED:

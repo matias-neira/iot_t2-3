@@ -158,7 +158,7 @@ void app_main(void) {
     }
     printf("Conectado con exito al AP %s\n", WIFI_AP_SSID);
 
-    xTaskCreate(print_counters, "print_counters", 1024, NULL, 5, NULL);
+    xTaskCreate(print_counters, "print_counters", 2048, NULL, 5, NULL);
 
     // Publisher MQTT
     esp_mqtt_client_config_t mqtt_cfg = {

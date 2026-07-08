@@ -9,7 +9,7 @@ Grupo:
 
 **Aclaraciones**
 - La tarea la realicé solo, ya que mi compañero no ha contestado mis mensajes en 3 semanas.
-- En la demostración se utilizo la rama PyQt6, debido a que la raspberry pi 5 tenía problemas instalando PyQt5, en esta rama (main) se encuentra la versión con PyQt5
+- En la demostración se utilizo esta rama (PyQt6), debido a que la raspberry pi 5 tenía problemas instalando PyQt5, en la rama main se encuentra la versión con PyQt5
 
 ## 1 Descripción de la Arquitectura del Sistema
 
